@@ -3,7 +3,10 @@
 The **AI Nutrition Analyzer** is a modern web application that uses your camera or uploaded image to scan food barcodes and analyze their nutrition using the OpenFoodFacts API. It combines AI-generated summaries with a sleek UI to help users make better food choices.
 
 ---
+## Use Now- 
+🔗 https://github.com/shivanggupta1509/Nutriscan
 
+---
 ## 🚀 Features
 
 - 📸 Real-time barcode scanning using the device camera
