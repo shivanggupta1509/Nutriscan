@@ -4,7 +4,7 @@ The **AI Nutrition Analyzer** is a modern web application that uses your camera 
 
 ---
 ## Use Now- 
-🔗 https://github.com/shivanggupta1509/Nutriscan
+🔗 https://nutriscanai.netlify.app/
 
 ---
 ## 🚀 Features
