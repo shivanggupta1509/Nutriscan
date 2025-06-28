@@ -1,2 +1,2 @@
 # Nutriscan
-Ai Powder nutrition scanner. 
+Ai Powered nutrition scanner. 
