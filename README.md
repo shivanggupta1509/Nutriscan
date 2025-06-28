@@ -34,8 +34,8 @@ The **AI Nutrition Analyzer** is a modern web application that uses your camera 
 
 1. **Clone the repository**  
    ```bash
-   git clone https://github.com/your-username/ai-nutrition-analyzer.git
-   cd ai-nutrition-analyzer
+   git clone https://github.com/shivanggupta1509/Nutriscan.git
+   cd Nutriscan
    ```
 
 2. **Open in browser**  
@@ -48,7 +48,7 @@ The **AI Nutrition Analyzer** is a modern web application that uses your camera 
      php -S localhost:8000
      ```
    - Open `http://localhost:8000` in your browser.
-   - 📌 **Edit `analyze.php` to insert your own OpenAI API key** (or any AI API you are using).
+   - 📌 **Edit `analyze.php` to insert your own Open Router API key** (or any AI API you are using).
 
 ---
 
@@ -56,13 +56,15 @@ The **AI Nutrition Analyzer** is a modern web application that uses your camera 
 
 If you're using the AI summary feature:
 
-- You must insert your own API key (e.g., from [OpenAI](https://platform.openai.com/)) in `analyze.php`.
+- You must insert your own API key (e.g., from [Open Router](https://openrouter.ai/)) in `analyze.php`.
   
 Example inside `analyze.php`:
 
 ```php
-$apiKey = 'YOUR_OPENAI_API_KEY'; // Replace this with your actual key
+$openrouter_api_key = "sks..."// Replace this with your actual key
+$model = "model of ai you will be using"
 ```
+
 
 - Without the key, the backend will fail to fetch summaries.
 
