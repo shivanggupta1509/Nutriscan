@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Nutrition Analyzer | Shivang's Project</title>
+  <!-- 
+    AI Nutrition Analyzer
+    Developed by Shivang
+    GitHub: https://github.com/shivanggupta1509
+    Copyright © 2025
+  -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Roboto+Mono&display=swap');
+
+    body {
+      margin: 0;
+      background: #121212;
+      font-family: 'Inter', sans-serif;
+      color: #fff;
+      line-height: 1.6;
+      overflow: hidden;
+    }
+
+    /* Header with GitHub link */
+    .header {
+      position: fixed;
+      top: -10px;
+      left: 10px;
+      right: 10px;
+      padding: 0.1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      background: rgba(18, 18, 18, 0.8);
+      backdrop-filter: blur(20px);
+    }
+    
+    .github-link {
+      color: #00c6ff;
+      text-decoration: none;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .github-link:hover {
+      color: #fff;
+      text-shadow: 0 0 10px rgba(0, 198, 255, 0.7);
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      max-height: 160px;
+      overflow: hidden;
+      margin-top: 60px;
+    }
+
+    video {
+      width: 100%;
+      max-height: 160px;
+      object-fit: cover;
+      background: black;
+      border-bottom: 1px solid #333;
+    }
+
+    .scan-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: linear-gradient(
+        0deg,
+        rgba(0, 198, 255, 0.1) 0%,
+        transparent 50%,
+        rgba(0, 198, 255, 0.1) 100%
+      );
+    }
+
+    .scan-line {
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(to right, transparent, #00c6ff 50%, transparent);
+      box-shadow: 0 0 20px #00c6ff, 0 0 30px #00c6ff;
+      position: absolute;
+      animation: scan 1.6s linear infinite;
+    }
+
+    @keyframes scan {
+      0% { top: 0; opacity: 1; }
+      50% { top: 100%; opacity: 0.8; }
+      100% { top: 0; opacity: 1; }
+    }
+
+    /* Info section with animated text */
+    .info-section {
+      padding: 1.5rem;
+      text-align: center;
+      animation: fadeIn 1s ease;
+    }
+    
+    .info-text {
+      background: rgba(42, 42, 42, 0.7);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #00c6ff;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .info-text::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 198, 255, 0.1), transparent);
+      animation: shine 3s infinite;
+    }
+    
+    @keyframes shine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .upload {
+      padding: 1.5rem;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    label {
+      background: #2a2a2a;
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: 1px solid #555;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s ease, transform 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    label:hover {
+      background: #3a3a3a;
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(0, 198, 255, 0.3);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    /* Backdrop for popup */
+    .backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .output {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      background: rgba(30, 30, 30, 0.95);
+      border-radius: 16px;
+      padding: 1.5rem;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .output.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #333;
+      border: none;
+      color: #fff;
+      font-size: 1.2rem;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .close-btn:hover {
+      background: #e74c3c;
+      transform: rotate(90deg);
+    }
+
+    .card {
+      background: #1e1e1e;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      animation: fadeIn 0.5s ease;
+    }
+
+    .thinking-animation {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 1rem;
+      height: 40px;
+    }
+
+    .thinking-animation span {
+      width: 14px;
+      height: 14px;
+      margin: 0 8px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #00c6ff, #ff007a);
+      animation: rotatePulse 1.5s infinite ease-in-out;
+      box-shadow: 0 0 12px rgba(0, 198, 255, 0.7);
+    }
+
+    .thinking-animation span:nth-child(2) { animation-delay: 0.3s; }
+    .thinking-animation span:nth-child(3) { animation-delay: 0.6s; }
+    .thinking-animation span:nth-child(4) { animation-delay: 0.9s; }
+
+    @keyframes rotatePulse {
+      0% { transform: scale(0.8) rotate(0deg); opacity: 0.5; }
+      50% { transform: scale(1.3) rotate(180deg); opacity: 1; }
+      100% { transform: scale(0.8) rotate(360deg); opacity: 0.5; }
+    }
+
+    .ai-text {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 1rem;
+      color: #ccc;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin-top: 1rem;
+      transition: opacity 0.3s ease;
+    }
+
+    .nutrition-table {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 1rem;
+    }
+
+    .nutrition-table div {
+      background: #2a2a2a;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      transition: background 0.3s ease;
+    }
+
+    .nutrition-table div:hover {
+      background: #3a3a3a;
+    }
+
+    .score-circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 1rem auto;
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+      box-shadow: 0 0 25px rgba(0, 198, 255, 0.8), 0 0 15px rgba(0, 0, 0, 0.5);
+      animation: pulseGlow 2s infinite ease-in-out;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .score-circle:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(0, 198, 255, 1), 0 0 20px rgba(0, 0, 0, 0.7);
+    }
+
+    .score-10, .score-9, .score-8 { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+    .score-7, .score-6, .score-5 { background: linear-gradient(135deg, #f1c40f, #e67e22); color: #000; }
+    .score-4, .score-3, .score-2, .score-1, .score-0 { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 25px rgba(0, 198, 255, 0.8), 0 0 15px rgba(0, 0, 0, 0.5); }
+      50% { box-shadow: 0 0 35px rgba(0, 198, 255, 1), 0 0 20px rgba(0, 0, 0, 0.7); }
+      100% { box-shadow: 0 0 25px rgba(0, 198, 255, 0.8), 0 0 15px rgba(0, 0, 0, 0.5); }
+    }
+
+    .alert {
+      background: #2a2a2a;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      border-left: 4px solid;
+      transition: transform 0.3s ease;
+    }
+
+    .alert:hover {
+      transform: translateX(5px);
+    }
+
+    .alert-processing { border-color: #f39c12; }
+    .alert-consumption { border-color: #e74c3c; }
+    .alert-banned { border-color: #c0392b; font-weight: bold; }
+
+    img.product-image {
+      display: block;
+      margin: 1rem auto;
+      border-radius: 8px;
+      max-width: 100%;
+      transition: transform 0.3s ease;
+    }
+
+    img.product-image:hover {
+      transform: scale(1.02);
+    }
+
+    /* Footer with copyright */
+    .footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #666;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(18, 18, 18, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+    }
+    
+    .footer a {
+      color: #00c6ff;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .footer a:hover {
+      color: #fff;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      .output {
+        width: 95%;
+        padding: 1rem;
+      }
+      .nutrition-table {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Backdrop for popup -->
+  <div class="backdrop" id="backdrop"></div>
+
+  <!-- Header with GitHub link -->
+  <div class="header">
+    <h3>AI Nutrition Analyzer</h3>
+    <a href="https://github.com/shivanggupta1509" class="github-link" target="_blank">
+      <svg height="30" viewBox="0 0 16 16" width="20" fill="currentColor">
+        <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+      </svg>
+      GitHub
+    </a>
+  </div>
+
+  <!-- Video scanning container -->
+  <div class="video-container">
+    <video autoplay playsinline></video>
+    <div class="scan-overlay">
+      <div class="scan-line"></div>
+    </div>
+  </div>
+
+  <!-- Info section -->
+  <div class="info-section">
+    <div class="info-text">
+      <h3>AI-Powered Nutrition Scanner</h3>
+      <p>Scan any food product barcode to get instant nutritional analysis, health score, and ingredient insights.</p>
+    </div>
+  </div>
+
+  <!-- Upload section -->
+  <div class="upload">
+    <label for="upload">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </svg>
+      Upload Image
+    </label>
+    <input type="file" id="upload" accept="image/*" />
+  </div>
+
+  <!-- Output panel -->
+  <div class="output" id="output">
+    <button class="close-btn" onclick="closePopup()">✖</button>
+    <div class="card">Scan or upload a barcode to begin.</div>
+  </div>
+
+  <!-- Footer with copyright -->
+  <div class="footer">
+    <p>Developed with ❤️ by <a href="https://github.com/shivanggupta1509" target="_blank">Shivang</a> | © 2025 AI Nutrition Analyzer</p>
+  </div>
+
+  <script>
+    /**
+     * AI Nutrition Analyzer
+     * Developed by Shivang
+     * GitHub: https://github.com/shivanggupta1509
+     * 
+     * This application scans food product barcodes and provides detailed
+     * nutritional analysis using the Open Food Facts API and AI processing.
+     */
+    
+    // DOM elements
+    const video = document.querySelector("video");
+    const output = document.getElementById("output");
+    const backdrop = document.getElementById("backdrop");
+    const fileInput = document.getElementById("upload");
+    const barcodeDetector = "BarcodeDetector" in window ? new BarcodeDetector() : null;
+    let lastScanned = "";
+
+    /**
+     * Displays a message in the output panel with loading animation
+     * @param {string} title - The main title/message
+     * @param {string} subtitle - Additional details (optional)
+     */
+    function showMessage(title, subtitle = "") {
+      output.innerHTML = `
+        <button class="close-btn" onclick="closePopup()">✖</button>
+        <div class="card">
+          <h3 style="text-align:center">${title}</h3>
+          <div class="thinking-animation"><span></span><span></span><span></span><span></span></div>
+          <div class="ai-text">${subtitle}</div>
+        </div>`;
+      output.classList.add("active");
+      backdrop.classList.add("active");
+    }
+
+    /**
+     * Closes the output panel and resets it to default state
+     */
+    function closePopup() {
+      output.classList.remove("active");
+      backdrop.classList.remove("active");
+      output.innerHTML = `
+        <button class="close-btn" onclick="closePopup()">✖</button>
+        <div class="card">Scan or upload a barcode to begin.</div>`;
+    }
+
+    /**
+     * Fetches product data from Open Food Facts API
+     * @param {string} code - The barcode to lookup
+     */
+    async function fetchProduct(code) {
+      showMessage("Searching product...", `Barcode: ${code}`);
+
+      try {
+        // Fetch product data from Open Food Facts API
+        const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+        const data = await res.json();
+        
+        if (!data.product) {
+          showMessage("Error", "Product not found.");
+          return;
+        }
+        
+        const p = data.product;
+        const name = p.product_name?.trim() || p.brands_tags?.[0] || "Scanned Product";
+        const iText = p.ingredients_text?.toLowerCase() || "";
+        const n = p.nutriments || {};
+        const image = p.image_front_url || p.image_url || "";
+        const servingSize = parseFloat(p.serving_size) || 100;
+        const additives = p.additives_n || 0;
+        const allergenCount = p.allergens_tags?.length || 0;
+        const categories = p.categories_tags || [];
+        const isBeverage = categories.some(c => c.includes("beverage") || c.includes("drink"));
+
+        // Prepare nutrition data object
+        const nutrition = {
+          serving_size: servingSize,
+          energy_kcal: parseFloat(n.energy_kcal) || 0,
+          sugars: parseFloat(n.sugars) || 0,
+          saturated_fat: parseFloat(n['saturated-fat']) || 0,
+          trans_fat: parseFloat(n['trans-fat']) || 0,
+          salt: parseFloat(n.salt) || 0,
+          fiber: parseFloat(n.fiber) || 0,
+          protein: parseFloat(n.proteins) || 0,
+          carbohydrates: parseFloat(n.carbohydrates) || 0,
+          fruits_pct: parseFloat(n['fruits-vegetables-nuts-estimate']) || 0,
+          vitamin_c: parseFloat(n['vitamin-c']) || 0,
+          vitamin_a: parseFloat(n['vitamin-a']) || 0,
+          calcium: parseFloat(n.calcium) || 0,
+          iron: parseFloat(n.iron) || 0,
+          cholesterol: parseFloat(n.cholesterol) || 0,
+          sodium: parseFloat(n.sodium) || 0,
+          nova_group: parseFloat(p.nova_group) || 1,
+          additives: additives,
+          allergen_count: allergenCount,
+          is_beverage: isBeverage
+        };
+
+        showMessage(`Analyzing ${name}...`, `Processing nutritional data...`);
+
+        // Calculate health score and generate alerts
+        const score = calculateScore(nutrition);
+        const processingAlert = getProcessingAlert(nutrition.nova_group);
+        const consumptionAlerts = getConsumptionAlerts(nutrition);
+        const bannedIngredients = checkBannedIngredients(iText);
+        const aiSummary = await getAISummary(iText, nutrition);
+
+        // Update output panel with results
+        output.innerHTML = `
+          <button class="close-btn" onclick="closePopup()">✖</button>
+          <div class="card">
+            <div class="score-circle score-${score}">${score}/10</div>
+            <div class="ai-text" id="ai-summary"></div>
+            ${processingAlert ? `<div class="alert alert-processing">${processingAlert}</div>` : ""}
+            ${consumptionAlerts.length ? `<div class="alert alert-consumption">${consumptionAlerts.join('<br>')}</div>` : ""}
+            ${bannedIngredients.length ? `<div class="alert alert-banned">Banned Ingredients Detected: ${bannedIngredients.join(', ')}</div>` : ""}
+          </div>
+          <div class="card">
+            <h3>${name}</h3>
+            ${image ? `<img src="${image}" alt="${name}" class="product-image" />` : ""}
+            <div class="nutrition-table">
+              ${Object.entries(nutrition).map(([k, v]) => `<div><strong>${k.replace(/_/g, ' ')}:</strong> ${v}</div>`).join('')}
+            </div>
+          </div>`;
+
+        output.classList.add("active");
+        backdrop.classList.add("active");
+
+        // Typewriter effect for AI summary
+        let i = 0;
+        const speed = 20;
+        function typeWriter() {
+          if (i < aiSummary.length) {
+            document.getElementById("ai-summary").innerHTML += aiSummary.charAt(i);
+            i++;
+            setTimeout(typeWriter, speed);
+          }
+        }
+        typeWriter();
+      } catch {
+        showMessage("Error", "Could not fetch product data.");
+      }
+    }
+
+    /**
+     * Calculates a health score (0-10) based on nutritional values
+     * @param {object} n - Nutrition data object
+     * @returns {number} Health score from 0 to 10
+     */
+    function calculateScore(n) {
+      let score = 100;
+      const perServing = n.serving_size / 100;
+
+      // Deduct points for unhealthy components
+      if (n.energy_kcal / perServing > 400) score -= Math.min(15, (n.energy_kcal / perServing - 400) / 40);
+      if (n.is_beverage && n.sugars / perServing > 5) {
+        score -= Math.min(25, (n.sugars / perServing - 5) * 5);
+      } else if (n.sugars / perServing > 10) {
+        score -= Math.min(20, (n.sugars / perServing - 10) * 3);
+      }
+      if (n.saturated_fat / perServing > 5) score -= Math.min(15, (n.saturated_fat / perServing - 5) * 3);
+      if (n.trans_fat / perServing > 0.1) score -= Math.min(20, (n.trans_fat / perServing) * 100);
+      if (n.salt / perServing > 1) score -= Math.min(12, (n.salt / perServing - 1) * 10);
+      if (n.sodium / perServing > 400) score -= Math.min(10, (n.sodium / perServing - 400) / 40);
+      if (n.cholesterol / perServing > 60) score -= Math.min(10, (n.cholesterol / perServing - 60) / 10);
+      if (n.carbohydrates / perServing > 40) score -= Math.min(8, (n.carbohydrates / perServing - 40) / 5);
+
+      // Add points for healthy components
+      if (n.fiber / perServing >= 3) score += Math.min(12, (n.fiber / perServing) * 2.5);
+      if (n.protein / perServing >= 5) score += Math.min(10, n.protein / perServing);
+      if (n.fruits_pct >= 20) score += Math.min(15, n.fruits_pct / 5);
+      if (n.vitamin_c / perServing >= 10) score += Math.min(6, n.vitamin_c / perServing / 2);
+      if (n.vitamin_a / perServing >= 200) score += Math.min(6, n.vitamin_a / perServing / 40);
+      if (n.calcium / perServing >= 150) score += Math.min(6, n.calcium / perServing / 30);
+      if (n.iron / perServing >= 2) score += Math.min(6, n.iron / perServing);
+
+      // Processing and additives deductions
+      if (n.nova_group === 4) score -= 20;
+      else if (n.nova_group === 3) score -= 10;
+      else if (n.nova_group === 2) score -= 5;
+      if (n.additives > 0) score -= Math.min(15, n.additives * 4);
+      if (n.allergen_count > 0) score -= Math.min(12, n.allergen_count * 3);
+
+      // Ensure score is between 0 and 100 then convert to 0-10 scale
+      score = Math.max(0, Math.min(100, score));
+      return Math.round((score / 100) * 10);
+    }
+
+    /**
+     * Returns a processing alert message based on NOVA group
+     * @param {number} novaGroup - The NOVA processing group (1-4)
+     * @returns {string} Processing alert message
+     */
+    function getProcessingAlert(novaGroup) {
+      switch (novaGroup) {
+        case 1: return "Unprocessed or minimally processed food";
+        case 2: return "Processed culinary ingredient";
+        case 3: return "Processed food";
+        case 4: return "Ultra-processed food (high in additives or artificial ingredients)";
+        default: return "";
+      }
+    }
+
+    /**
+     * Generates consumption alerts based on nutritional values
+     * @param {object} n - Nutrition data object
+     * @returns {array} Array of alert messages
+     */
+    function getConsumptionAlerts(n) {
+      const alerts = [];
+      const perServing = n.serving_size / 100;
+      
+      if (n.is_beverage && n.sugars / perServing > 5) {
+        alerts.push("High sugar content for a beverage. Limit consumption to avoid health risks.");
+      } else if (n.sugars / perServing > 10) {
+        alerts.push("High sugar content. Consume in moderation.");
+      }
+      if (n.sodium / perServing > 400) {
+        alerts.push("High sodium content. May contribute to hypertension if consumed excessively.");
+      }
+      if (n.saturated_fat / perServing > 5) {
+        alerts.push("High saturated fat. Limit intake to support heart health.");
+      }
+      if (n.trans_fat / perServing > 0.1) {
+        alerts.push("Contains trans fats. Avoid regular consumption due to health risks.");
+      }
+      if (n.allergen_count > 0) {
+        alerts.push("Contains allergens. Check ingredients if you have allergies.");
+      }
+      return alerts;
+    }
+
+    /**
+     * Checks for banned/restricted ingredients
+     * @param {string} ingredients - Ingredients text
+     * @returns {array} Array of banned ingredients found
+     */
+    function checkBannedIngredients(ingredients) {
+      const bannedIngredients = {
+        'azodicarbonamide': ['USA (in some states)', 'EU'],
+        'potassium bromate': ['EU', 'Canada', 'China'],
+        'bha': ['Japan', 'EU (restricted)'],
+        'bht': ['Japan', 'EU (restricted)'],
+        'red 40': ['EU (requires warning label)'],
+        'yellow 5': ['EU (requires warning label)'],
+        'yellow 6': ['EU (requires warning label)'],
+        'brominated vegetable oil': ['EU', 'India', 'Japan'],
+        'propyl paraben': ['EU'],
+        'titanium dioxide': ['EU']
+      };
+      
+      const found = [];
+      for (const [ingredient, countries] of Object.entries(bannedIngredients)) {
+        if (ingredients.includes(ingredient)) {
+          found.push(`${ingredient} (banned in ${countries.join(', ')})`);
+        }
+      }
+      return found;
+    }
+
+    /**
+     * Simulates fetching an AI-generated summary (would connect to backend in production)
+     * @param {string} ingredients - Ingredients text
+     * @param {object} nutrition - Nutrition data object
+     * @returns {string} AI-generated summary
+     */
+    async function getAISummary(ingredients, nutrition) {
+      try {
+        // In a real implementation, this would connect to a backend API
+        // For demo purposes, we return a simulated response
+        return `This product has a nutritional score of ${calculateScore(nutrition)}/10. ${
+          nutrition.nova_group >= 3 ? 
+          "It is processed which may reduce its nutritional value." : 
+          "It is minimally processed, preserving more nutrients."
+        } ${
+          nutrition.sugars > 10 ? 
+          "Contains high sugar content - consume in moderation." : 
+          "Sugar content is within reasonable limits."
+        } Always check for allergens if you have food sensitivities.`;
+      } catch {
+        return "AI summary unavailable.";
+      }
+    }
+
+    // Event listener for file upload
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = () => img.src = reader.result;
+      reader.readAsDataURL(file);
+      
+      img.onload = async () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        
+        try {
+          const result = await barcodeDetector.detect(canvas);
+          if (result.length) fetchProduct(result[0].rawValue);
+          else showMessage("Oops!", "No barcode found in image.");
+        } catch {
+          showMessage("Error", "Could not read barcode from image.");
+        }
+      };
+    });
+
+    /**
+     * Starts the camera and continuously scans for barcodes
+     */
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: "environment" } 
+        });
+        video.srcObject = stream;
+        await video.play();
+        
+        // Continuous scanning loop
+        while (true) {
+          await new Promise(r => setTimeout(r, 600));
+          if (video.readyState !== 4) continue;
+          
+          try {
+            const result = await barcodeDetector.detect(video);
+            if (result.length && result[0].rawValue !== lastScanned) {
+              lastScanned = result[0].rawValue;
+              fetchProduct(result[0].rawValue);
+            }
+          } catch {
+            // Ignore detection errors
+          }
+        }
+      } catch {
+        showMessage("Camera Error", "Unable to access camera. Please upload an image instead.");
+      }
+    }
+
+    // Initialize camera on page load
+    startCamera();
+  </script>
+</body>
+</html>
